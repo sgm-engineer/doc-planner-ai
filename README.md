@@ -78,8 +78,3 @@ supabase/
   schema/                    # テーブル定義（参考用、実行はSupabase側で管理）
 ```
 
-## 既知の制約
-
-- ユーザー認証・ユーザーごとのデータ分離は未実装です
-- `conversationId`はブラウザのメモリ上でのみ保持しており、ページを離れる/リロードすると会話を再開できません
-- PDFアップロード時のEmbedding生成は、Gemini無料枠のレート制限（429エラー）を避けるため意図的に直列処理にしています（詳細は [`src/app/api/documents/upload/route.ts`](src/app/api/documents/upload/route.ts) のコメント参照）
