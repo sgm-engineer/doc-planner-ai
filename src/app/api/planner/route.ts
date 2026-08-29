@@ -19,8 +19,8 @@ const google = createGoogleGenerativeAI({
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { id: conversationId, messages } = body as {
-    id?: string;
+  const { conversationId, messages } = body as {
+    conversationId?: string;
     messages: UIMessage[];
   };
 
@@ -29,6 +29,15 @@ export async function POST(req: NextRequest) {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // conversationsテーブルに行が無いとmessages/plansの外部キー制約に違反するため、
+  // 初回リクエスト時に行が無ければ作成しておく
+  if (conversationId) {
+    const client = createServerSupabaseClient();
+    await client
+      .from("conversations")
+      .upsert({ id: conversationId, mode: "planner" }, { onConflict: "id", ignoreDuplicates: true });
   }
 
   const userText = getMessageText(

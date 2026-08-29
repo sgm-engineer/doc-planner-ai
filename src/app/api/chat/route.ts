@@ -49,8 +49,8 @@ function extractLatestUserText(messages: UIMessage[]): string {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { id: conversationId, messages } = body as {
-    id?: string;
+  const { conversationId, messages } = body as {
+    conversationId?: string;
     messages: UIMessage[];
   };
 
@@ -67,6 +67,15 @@ export async function POST(req: NextRequest) {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // conversationsテーブルに行が無いとmessagesの外部キー制約に違反するため、
+  // 初回リクエスト時に行が無ければ作成しておく
+  if (conversationId) {
+    const client = createServerSupabaseClient();
+    await client
+      .from("conversations")
+      .upsert({ id: conversationId, mode: "qa" }, { onConflict: "id", ignoreDuplicates: true });
   }
 
   // 最新ユーザーメッセージをEmbeddingして類似チャンク検索
