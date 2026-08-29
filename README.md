@@ -18,7 +18,7 @@
 
 - [Next.js 16](https://nextjs.org/)（App Router）
 - [Vercel AI SDK](https://sdk.vercel.ai/)（`ai`, `@ai-sdk/google`, `@ai-sdk/react`）
-- [Gemini API](https://ai.google.dev/)（`gemini-3.5-flash-lite` / Embedding: `text-embedding-004`）
+- [Gemini API](https://ai.google.dev/)（`gemini-3.5-flash-lite` / Embedding: `gemini-embedding-001`、768次元に切り詰めて使用）
 - [Supabase](https://supabase.com/)（Postgres + pgvector）
 - Tailwind CSS
 
@@ -66,6 +66,7 @@ npm run dev
 
 ```
 src/
+  middleware.ts              # Basic認証（BASIC_AUTH_USER/PASSWORD設定時のみ有効）
   app/
     page.tsx              # トップ（モード選択）
     qa/page.tsx            # QA Bot画面
@@ -74,7 +75,7 @@ src/
       documents/           # PDFアップロード・一覧・削除
       chat/                 # QA BotのRAGチャットAPI
       planner/              # 企画書ヒアリング・生成API
-  components/               # ChatWindow, DocumentUploader など
+  components/               # ChatWindow, DocumentUploader, AppHeader など
   lib/
     pdfParser.ts            # PDFテキスト抽出・チャンク分割
     embedding.ts            # Gemini Embedding生成・類似検索
