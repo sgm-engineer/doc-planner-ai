@@ -161,7 +161,7 @@ export async function generateSection(
   const instruction = SECTION_PROMPTS[sectionName] ?? "内容を記述してください。";
 
   const { text } = await generateText({
-    model: google("gemini-2.0-flash"),
+    model: google("gemini-3.5-flash-lite"),
     prompt: [
       "以下のヒアリング情報をもとに、企画書の「" + sectionName + "」セクションを日本語で記述してください。",
       instruction,

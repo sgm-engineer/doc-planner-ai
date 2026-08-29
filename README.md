@@ -18,7 +18,7 @@
 
 - [Next.js 16](https://nextjs.org/)（App Router）
 - [Vercel AI SDK](https://sdk.vercel.ai/)（`ai`, `@ai-sdk/google`, `@ai-sdk/react`）
-- [Gemini API](https://ai.google.dev/)（`gemini-2.0-flash` / Embedding: `text-embedding-004`）
+- [Gemini API](https://ai.google.dev/)（`gemini-3.5-flash-lite` / Embedding: `text-embedding-004`）
 - [Supabase](https://supabase.com/)（Postgres + pgvector）
 - Tailwind CSS
 
@@ -42,7 +42,13 @@ GEMINI_API_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+
+# Basic認証（任意。設定するとアプリ全体にBasic認証がかかります）
+BASIC_AUTH_USER=
+BASIC_AUTH_PASSWORD=
 ```
+
+`BASIC_AUTH_USER`/`BASIC_AUTH_PASSWORD`は未設定の場合、認証をスキップします（ローカル開発用）。公開デプロイ（Vercelなど）では、認証のないAPIを誰でも叩けてGeminiのクォータを消費されてしまうため、**必ず設定してください**。
 
 ### 3. データベースのセットアップ
 
