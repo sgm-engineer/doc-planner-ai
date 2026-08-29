@@ -56,6 +56,9 @@ export async function POST(req: NextRequest) {
   const documentId: string = docData.id;
 
   // チャンクをEmbedding生成してSupabaseに保存（1件ずつ処理）
+  // Promise.allで並列化すると、Gemini Embedding APIの無料枠のレート制限に
+  // 引っかかり429エラーが頻発したため直列処理にしている。
+  // 安定性とのトレードオフとして、大きなPDFではアップロードに時間がかかる。
   try {
     for (let i = 0; i < chunks.length; i++) {
       const embedding = await generateEmbedding(chunks[i]);

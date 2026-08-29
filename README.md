@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Doc Planner AI
 
-## Getting Started
+社内ドキュメント（PDF）をアップロードし、RAGを使ってAIに質問したり、AIとのヒアリングを通じて企画書を自動生成できるNext.jsアプリです。
 
-First, run the development server:
+## 機能
+
+### Mode 1: QA Bot（`/qa`）
+- PDF資料をアップロードすると、テキスト抽出 → チャンク分割 → Embedding化してSupabaseに保存
+- ユーザーの質問をEmbedding化し、pgvectorで類似チャンクを検索（RAG）
+- 検索結果を根拠として、根拠付きでAIが回答（参照ドキュメント名を表示）
+
+### Mode 2: 企画書生成（`/planner`）
+- AIとの5ステップのヒアリング（テーマ・背景・ターゲット・施策・KPI）を1問ずつ実施
+- アップロード済み資料があれば、関連する過去事例をRAGで参照しながら質問・生成
+- ヒアリング完了後、5セクション構成（背景・課題／目的・ゴール／ターゲット・ペルソナ／施策・解決策／期待効果・KPI）のMarkdown企画書を自動生成
+
+## 技術スタック
+
+- [Next.js 16](https://nextjs.org/)（App Router）
+- [Vercel AI SDK](https://sdk.vercel.ai/)（`ai`, `@ai-sdk/google`, `@ai-sdk/react`）
+- [Gemini API](https://ai.google.dev/)（`gemini-2.0-flash` / Embedding: `text-embedding-004`）
+- [Supabase](https://supabase.com/)（Postgres + pgvector）
+- Tailwind CSS
+
+## セットアップ
+
+### 1. 依存パッケージのインストール
+
+```bash
+npm install
+```
+
+### 2. 環境変数の設定
+
+`.env.local` を作成し、以下を設定してください。
+
+```bash
+# Gemini API
+GEMINI_API_KEY=
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+### 3. データベースのセットアップ
+
+Supabase側でテーブル・pgvector拡張・類似検索用の`match_chunks`関数を用意する必要があります。テーブル定義は [`supabase/schema/`](supabase/schema) 配下を参照してください（`documents` → `document_chunks`、`conversations` → `messages`/`plans` の順に依存）。
+
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) で起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ディレクトリ構成（抜粋）
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/
+    page.tsx              # トップ（モード選択）
+    qa/page.tsx            # QA Bot画面
+    planner/page.tsx       # 企画書生成画面
+    api/
+      documents/           # PDFアップロード・一覧・削除
+      chat/                 # QA BotのRAGチャットAPI
+      planner/              # 企画書ヒアリング・生成API
+  components/               # ChatWindow, DocumentUploader など
+  lib/
+    pdfParser.ts            # PDFテキスト抽出・チャンク分割
+    embedding.ts            # Gemini Embedding生成・類似検索
+    plannerAgent.ts          # 企画書ヒアリングのステップ管理・プロンプト構築
+    supabase.ts              # Supabaseクライアント（anon / service role）
+supabase/
+  schema/                    # テーブル定義（参考用、実行はSupabase側で管理）
+```
 
-## Learn More
+## 既知の制約
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- ユーザー認証・ユーザーごとのデータ分離は未実装です
+- `conversationId`はブラウザのメモリ上でのみ保持しており、ページを離れる/リロードすると会話を再開できません
+- PDFアップロード時のEmbedding生成は、Gemini無料枠のレート制限（429エラー）を避けるため意図的に直列処理にしています（詳細は [`src/app/api/documents/upload/route.ts`](src/app/api/documents/upload/route.ts) のコメント参照）
