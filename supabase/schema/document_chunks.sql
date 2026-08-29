@@ -13,4 +13,4 @@ COMMENT ON TABLE public.document_chunks IS 'PDFをチャンク分割し、Embedd
 COMMENT ON COLUMN public.document_chunks.document_id IS '紐づくdocuments.id（削除時cascade想定）';
 COMMENT ON COLUMN public.document_chunks.content IS 'チャンク分割されたPDF本文の1片';
 COMMENT ON COLUMN public.document_chunks.chunk_index IS '同一document内でのチャンク順序（0始まり）';
-COMMENT ON COLUMN public.document_chunks.embedding IS 'ChunkのEmbeddingベクトル（Gemini text-embedding-004、pgvector型）。match_chunks RPCの類似度検索で使用';
+COMMENT ON COLUMN public.document_chunks.embedding IS 'ChunkのEmbeddingベクトル（Gemini gemini-embedding-001を768次元に切り詰めたもの、pgvector型）。match_chunks RPCの類似度検索で使用';

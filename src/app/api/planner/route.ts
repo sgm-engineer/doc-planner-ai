@@ -70,10 +70,13 @@ export async function POST(req: NextRequest) {
           const planMarkdown = await generateFullPlan(answers, ragContext);
 
           const client = createServerSupabaseClient();
-          await client.from("plans").insert({
+          const { error } = await client.from("plans").insert({
             conversation_id: conversationId,
             content: planMarkdown,
           });
+          if (error) {
+            throw new Error(error.message);
+          }
         } catch (e) {
           console.error("Plan generation failed:", e);
         }

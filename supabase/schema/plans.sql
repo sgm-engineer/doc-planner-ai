@@ -8,6 +8,7 @@ CREATE TABLE public.plans (
   target text,
   measures text,
   kpi text,
+  content text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT plans_pkey PRIMARY KEY (id),
@@ -23,3 +24,4 @@ COMMENT ON COLUMN public.plans.purpose IS '「目的・ゴール」セクショ�
 COMMENT ON COLUMN public.plans.target IS '「ターゲット・ペルソナ」セクション';
 COMMENT ON COLUMN public.plans.measures IS '「施策・解決策」セクション';
 COMMENT ON COLUMN public.plans.kpi IS '「期待効果・KPI」セクション';
+COMMENT ON COLUMN public.plans.content IS '生成された企画書のMarkdown全文（アプリコードが実際に読み書きしているのはこのカラムのみ）';
